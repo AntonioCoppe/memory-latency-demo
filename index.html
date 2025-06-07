@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Latency Demo</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 20px; }
+    #grid { display: grid; grid-template-columns: repeat(4, 100px); grid-gap: 20px; }
+    .mem { width: 100px; height: 100px; background: #4caf50; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .mem:hover { background: #45a047; }
+    #cpu { margin-top: 40px; width: 150px; height: 150px; background: #2196f3; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .packet { width: 20px; height: 20px; background: #ffeb3b; position: absolute; }
+  </style>
+</head>
+<body>
+  <h1>Memory to CPU Latency Demo</h1>
+  <div id="grid"></div>
+  <div id="cpu">CPU</div>
+
+  <script>
+    const types = {
+      Registers: 50,
+      Cache: 100,
+      RAM: 200,
+      SSD: 400,
+      Flash: 600,
+      NAS: 800,
+      DSS: 1000,
+      Tape: 1200
+    };
+
+    const grid = document.getElementById('grid');
+    const cpu = document.getElementById('cpu');
+
+    // Create memory squares
+    Object.keys(types).forEach(name => {
+      const div = document.createElement('div');
+      div.className = 'mem';
+      div.textContent = name;
+      div.addEventListener('click', () => sendPacket(div, types[name]));
+      grid.appendChild(div);
+    });
+
+    function sendPacket(fromElem, delay) {
+      const packet = document.createElement('div');
+      packet.className = 'packet';
+      document.body.appendChild(packet);
+
+      // start position
+      const start = fromElem.getBoundingClientRect();
+      packet.style.left = start.left + start.width/2 - 10 + 'px';
+      packet.style.top = start.top + start.height/2 - 10 + 'px';
+
+      // end position
+      const end = cpu.getBoundingClientRect();
+      const dx = end.left + end.width/2 - (start.left + start.width/2);
+      const dy = end.top + end.height/2 - (start.top + start.height/2);
+
+      // animate packet to CPU
+      packet.animate(
+        [ { transform: 'translate(0, 0)' }, { transform: `translate(${dx}px, ${dy}px)` } ],
+        { duration: delay, easing: 'linear' }
+      ).onfinish = () => packet.remove();
+    }
+  </script>
+</body>
+</html>
