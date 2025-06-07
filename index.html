@@ -5,15 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Memory Latency Motherboard Layout</title>
   <style>
-    body { background: #1e1e1e; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-    h1 { margin-top: 20px; }
+    body { background: #1e1e1e; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin:0; padding:0; }
+    h1 { margin: 20px 0; }
     #board {
       position: relative;
-      width: 900px;
-      height: 600px;
+      width: 1200px;
+      height: 700px;
       background: #2c2c2c;
       border: 4px solid #444;
-      margin: 20px 0;
     }
     .mem {
       position: absolute;
@@ -25,103 +24,96 @@
       font-size: 12px;
       user-select: none;
     }
-    /* CPU cluster */
-    #l3 {
-      width: 340px; height: 340px;
-      border: 2px dashed #8e24aa;
-      top: 130px; left: 280px;
-    }
-    #l2 {
-      width: 280px; height: 280px;
-      border: 2px dashed #5e35b1;
-      top: 160px; left: 310px;
-    }
-    #l1 {
-      width: 220px; height: 220px;
-      border: 2px dashed #3949ab;
-      top: 190px; left: 340px;
-    }
-    #cpu-socket {
-      width: 160px; height: 160px;
-      background: #2196f3;
-      top: 230px; left: 380px;
-    }
-    #regs {
-      width: 80px; height: 80px;
-      background: #f44336;
-      top: 260px; left: 415px;
-    }
-    /* RAM slots */
-    .ram-slot {
-      width: 40px; height: 200px;
-      background: #4caf50;
-      top: 190px;
-    }
-    #ram1 { left: 550px; }
-    #ram2 { left: 600px; }
-    #ram3 { left: 650px; }
-    #ram4 { left: 700px; }
-    /* SSD, HDD, NAS */
-    #ssd {
-      width: 80px; height: 60px;
-      background: #ff9800;
-      top: 420px; left: 520px;
-    }
-    #hdd {
-      width: 100px; height: 50px;
-      background: #795548;
-      top: 490px; left: 500px;
-    }
-    #nas {
-      width: 100px; height: 80px;
-      background: #9e9e9e;
-      top: 50px; left: 50px;
-    }
     .label { pointer-events: none; }
-    .packet {
-      width: 12px; height: 12px;
-      background: #ffeb3b;
-      position: absolute;
-      border-radius: 2px;
-    }
+
+    /* CPU and caches cluster */
+    #l3 { width: 340px; height: 340px; border: 2px dashed #8e24aa; top: 180px; left: 430px; }
+    #l2 { width: 280px; height: 280px; border: 2px dashed #5e35b1; top: 210px; left: 460px; }
+    #l1 { width: 220px; height: 220px; border: 2px dashed #3949ab; top: 240px; left: 490px; }
+    #cpu-socket { width: 160px; height: 160px; background: #2196f3; top: 280px; left: 520px; }
+    #regs { width: 80px; height: 80px; background: #f44336; top: 310px; left: 550px; }
+
+    /* RAM slots */
+    .ram-slot { width: 40px; height: 200px; background: #4caf50; }
+    #ram1 { top: 240px; left: 780px; }
+    #ram2 { top: 240px; left: 830px; }
+    #ram3 { top: 240px; left: 880px; }
+    #ram4 { top: 240px; left: 930px; }
+
+    /* SSD & HDD */
+    #ssd { width: 100px; height: 60px; background: #ff9800; top: 480px; left: 800px; }
+    #hdd { width: 120px; height: 50px; background: #795548; top: 550px; left: 780px; }
+
+    /* Network latencies */
+    #net-nyc { width: 100px; height: 30px; background: #009688; top: 580px; left: 20px; }
+    #net-uk  { width: 100px; height: 30px; background: #009688; top: 620px; left: 20px; }
+    #net-aus { width: 120px; height: 30px; background: #009688; top: 660px; left: 20px; }
+
+    /* Virtualization & reboot events */
+    #os     { width: 120px; height: 30px; background: #e91e63; top: 580px; left: 1040px; }
+    #scsi   { width: 120px; height: 30px; background: #ff5722; top: 620px; left: 1040px; }
+    #hwv    { width: 120px; height: 30px; background: #cc7722; top: 660px; left: 1040px; }
+    #phy    { width: 140px; height: 30px; background: #212121; top: 700px; left: 1040px; }
+
+    /* Packet styling */
+    .packet { width: 12px; height: 12px; background: #ffeb3b; position: absolute; border-radius: 2px; }
   </style>
 </head>
 <body>
-  <h1>Memory Latency on a Motherboard Layout</h1>
+  <h1>Memory Latency on a Motherboard</h1>
   <div id="board">
-    <div id="l3" class="mem" data-lat="L3"></div>
-    <div id="l2" class="mem" data-lat="L2"></div>
-    <div id="l1" class="mem" data-lat="L1"></div>
+    <!-- CPU cluster -->
+    <div id="l3" class="mem" data-lat="L3"><span class="label">L3</span></div>
+    <div id="l2" class="mem" data-lat="L2"><span class="label">L2</span></div>
+    <div id="l1" class="mem" data-lat="L1"><span class="label">L1</span></div>
     <div id="cpu-socket" class="mem" data-lat="CPU"><span class="label">CPU</span></div>
     <div id="regs" class="mem" data-lat="Registers"><span class="label">Regs</span></div>
 
+    <!-- RAM -->
     <div id="ram1" class="mem ram-slot" data-lat="RAM"><span class="label">RAM</span></div>
     <div id="ram2" class="mem ram-slot" data-lat="RAM"><span class="label">RAM</span></div>
     <div id="ram3" class="mem ram-slot" data-lat="RAM"><span class="label">RAM</span></div>
     <div id="ram4" class="mem ram-slot" data-lat="RAM"><span class="label">RAM</span></div>
 
+    <!-- Storage -->
     <div id="ssd" class="mem" data-lat="SSD"><span class="label">SSD</span></div>
     <div id="hdd" class="mem" data-lat="HDD"><span class="label">HDD</span></div>
-    <div id="nas" class="mem" data-lat="NAS"><span class="label">NAS</span></div>
+
+    <!-- Network -->
+    <div id="net-nyc" class="mem" data-lat="Net_NYC"><span class="label">SF→NYC</span></div>
+    <div id="net-uk"  class="mem" data-lat="Net_UK"><span class="label">SF→UK</span></div>
+    <div id="net-aus" class="mem" data-lat="Net_AUS"><span class="label">SF→AUS</span></div>
+
+    <!-- Reboots & timeouts -->
+    <div id="os"   class="mem" data-lat="OS"><span class="label">OS Reboot</span></div>
+    <div id="scsi" class="mem" data-lat="SCSI"><span class="label">SCSI Timeout</span></div>
+    <div id="hwv"  class="mem" data-lat="HW"><span class="label">HW Virt</span></div>
+    <div id="phy"  class="mem" data-lat="PHYS"><span class="label">System Reboot</span></div>
   </div>
 
   <script>
-    // Real-world latencies in ms (visual scale)
-    const latencies = {
-      Registers: 50,
-      CPU: 0,
-      L1:   80,
-      L2:  120,
-      L3:  200,
-      RAM: 400,
-      SSD: 600,
-      HDD: 800,
-      NAS:1000
+    // Precomputed animation durations (ms) on a log scale
+    const durations = {
+      Registers: 100,
+      CPU:       100,
+      L1:        260,
+      L2:        423,
+      L3:        643,
+      RAM:       967,
+      SSD:      1940,
+      HDD:      2506,
+      Net_NYC:  2806,
+      Net_UK:   2910,
+      Net_AUS:  3030,
+      OS:       3473,
+      SCSI:     3766,
+      HW:       3806,
+      PHYS:     4100
     };
 
     document.querySelectorAll('.mem').forEach(el => {
       const key = el.dataset.lat;
-      if (!latencies[key] && latencies[key] !== 0) return;
+      if (!(key in durations)) return;
       el.addEventListener('click', () => {
         const packet = document.createElement('div');
         packet.className = 'packet';
@@ -137,7 +129,7 @@
 
         packet.animate(
           [ { transform: 'translate(0,0)' }, { transform: `translate(${dx}px, ${dy}px)` } ],
-          { duration: latencies[key], easing: 'linear' }
+          { duration: durations[key], easing: 'linear' }
         ).onfinish = () => packet.remove();
       });
     });
