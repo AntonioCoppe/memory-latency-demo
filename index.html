@@ -3,66 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Memory Latency Demo</title>
+  <title>Memory Latency Interactive Demo</title>
   <style>
     body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 20px; }
-    #grid { display: grid; grid-template-columns: repeat(4, 100px); grid-gap: 20px; }
-    .mem { width: 100px; height: 100px; background: #4caf50; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
-    .mem:hover { background: #45a047; }
-    #cpu { margin-top: 40px; width: 150px; height: 150px; background: #2196f3; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .packet { width: 20px; height: 20px; background: #ffeb3b; position: absolute; }
+    #container { display: flex; align-items: center; margin-top: 20px; }
+
+    /* CPU cluster with nested registers and caches */
+    #cpu-cluster { position: relative; width: 300px; height: 300px; }
+    .mem-level { position: absolute; border: 2px solid #333; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    #l3 { width: 300px; height: 300px; }
+    #l2 { width: 240px; height: 240px; }
+    #l1 { width: 180px; height: 180px; }
+    #cpu { width: 120px; height: 120px; background: #2196f3; color: white; }
+    #regs { width: 60px; height: 60px; background: #f44336; color: white; }
+    /* center all nested boxes */
+    #cpu-cluster .mem-level { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .label { pointer-events: none; font-size: 12px; }
+
+    /* Other memory types in a row */
+    #others { display: flex; gap: 40px; margin-left: 80px; }
+    .mem-other { width: 100px; height: 100px; border: 2px solid #333; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #4caf50; color: white; }
+    .mem-other .label { font-size: 14px; }
+
+    /* Packet styling */
+    .packet { width: 15px; height: 15px; background: #ffeb3b; position: absolute; border-radius: 3px; }
   </style>
 </head>
 <body>
-  <h1>Memory to CPU Latency Demo</h1>
-  <div id="grid"></div>
-  <div id="cpu">CPU</div>
+  <h1>Memory → CPU Latency Demo</h1>
+  <div id="container">
+    <div id="cpu-cluster">
+      <div id="l3" class="mem-level" data-level="L3"><div class="label">L3</div></div>
+      <div id="l2" class="mem-level" data-level="L2"><div class="label">L2</div></div>
+      <div id="l1" class="mem-level" data-level="L1"><div class="label">L1</div></div>
+      <div id="cpu" class="mem-level" data-level="CPU"><div class="label">CPU</div>
+        <div id="regs" class="mem-level" data-level="Registers"><div class="label">Reg</div></div>
+      </div>
+    </div>
+    <div id="others">
+      <div class="mem-other" data-level="RAM"><div class="label">RAM</div></div>
+      <div class="mem-other" data-level="SSD"><div class="label">SSD</div></div>
+      <div class="mem-other" data-level="HDD"><div class="label">HDD</div></div>
+      <div class="mem-other" data-level="NAS"><div class="label">NAS</div></div>
+    </div>
+  </div>
 
   <script>
-    const types = {
+    // Approximate latencies (ms) scaled for visibility
+    const latencies = {
       Registers: 50,
-      Cache: 100,
-      RAM: 200,
-      SSD: 400,
-      Flash: 600,
-      NAS: 800,
-      DSS: 1000,
-      Tape: 1200
+      L1: 80,
+      L2: 120,
+      L3: 200,
+      RAM: 400,
+      SSD: 600,
+      HDD: 800,
+      NAS: 1000
     };
 
-    const grid = document.getElementById('grid');
-    const cpu = document.getElementById('cpu');
+    document.querySelectorAll('[data-level]').forEach(el => {
+      const level = el.dataset.level;
+      if (!latencies[level]) return;  // skip CPU container
+      el.addEventListener('click', () => {
+        const packet = document.createElement('div');
+        packet.className = 'packet';
+        document.body.appendChild(packet);
 
-    // Create memory squares
-    Object.keys(types).forEach(name => {
-      const div = document.createElement('div');
-      div.className = 'mem';
-      div.textContent = name;
-      div.addEventListener('click', () => sendPacket(div, types[name]));
-      grid.appendChild(div);
+        // start position
+        const from = el.getBoundingClientRect();
+        packet.style.left = from.left + from.width/2 - 7.5 + 'px';
+        packet.style.top  = from.top  + from.height/2 - 7.5 + 'px';
+
+        // end position (center of CPU box)
+        const cpuRect = document.getElementById('cpu').getBoundingClientRect();
+        const dx = cpuRect.left + cpuRect.width/2 - (from.left + from.width/2);
+        const dy = cpuRect.top  + cpuRect.height/2 - (from.top  + from.height/2);
+
+        packet.animate(
+          [ { transform: 'translate(0,0)' }, { transform: `translate(${dx}px, ${dy}px)` } ],
+          { duration: latencies[level], easing: 'linear' }
+        ).onfinish = () => packet.remove();
+      });
     });
-
-    function sendPacket(fromElem, delay) {
-      const packet = document.createElement('div');
-      packet.className = 'packet';
-      document.body.appendChild(packet);
-
-      // start position
-      const start = fromElem.getBoundingClientRect();
-      packet.style.left = start.left + start.width/2 - 10 + 'px';
-      packet.style.top = start.top + start.height/2 - 10 + 'px';
-
-      // end position
-      const end = cpu.getBoundingClientRect();
-      const dx = end.left + end.width/2 - (start.left + start.width/2);
-      const dy = end.top + end.height/2 - (start.top + start.height/2);
-
-      // animate packet to CPU
-      packet.animate(
-        [ { transform: 'translate(0, 0)' }, { transform: `translate(${dx}px, ${dy}px)` } ],
-        { duration: delay, easing: 'linear' }
-      ).onfinish = () => packet.remove();
-    }
   </script>
 </body>
 </html>
