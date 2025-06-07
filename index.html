@@ -94,22 +94,23 @@
   <script>
     // Precomputed animation durations (ms) on a log scale
     const durations = {
-      Registers: 100,
-      CPU:       100,
-      L1:        260,
-      L2:        423,
-      L3:        643,
-      RAM:       967,
-      SSD:      1940,
-      HDD:      2506,
-      Net_NYC:  2806,
-      Net_UK:   2910,
-      Net_AUS:  3030,
-      OS:       3473,
-      SCSI:     3766,
-      HW:       3806,
-      PHYS:     4100
+    Registers: 0.003,        // 0.0000003 × 10000
+    CPU:       0.003,        // 0.0000003 × 10000
+    L1:        0.009,        // 0.0000009 × 10000
+    L2:        0.028,        // 0.0000028 × 10000
+    L3:        0.129,        // 0.0000129 × 10000
+    RAM:       1.2,          // 0.00012 × 10000
+    SSD:       1000,         // 0.1 × 10000
+    HDD:       55000,        // 5.5 × 10000
+    Net_NYC:   400000,       // 40 × 10000
+    Net_UK:    810000,       // 81 × 10000
+    Net_AUS:   1830000,      // 183 × 10000
+    OS:        40000000,     // 4000 × 10000
+    SCSI:      300000000,    // 30000 × 10000
+    HW:        400000000,    // 40000 × 10000
+    PHYS:      3000000000    // 300000 × 10000
     };
+
 
     document.querySelectorAll('.mem').forEach(el => {
       const key = el.dataset.lat;
