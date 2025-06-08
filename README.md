@@ -1,54 +1,120 @@
-# React + TypeScript + Vite
+# Memory Latency Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An **interactive, web‑based simulation** that visualizes the relative latencies of different memory/storage media—from CPU registers all the way out to network and reboot times—laid out on a motherboard‑style diagram.
 
-Currently, two official plugins are available:
+<p align="center">
+  <img src="./public/preview.png" alt="Screenshot of Memory Latency Demo" width="600">
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Live Demo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+👉 [https://antonioCoppe.github.io/memory-latency-demo/](https://antonioCoppe.github.io/memory-latency-demo/)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+*(Published via GitHub Pages)*
+
+---
+
+## 🔍 Project Overview
+
+* **Goal:** Help developers and students grasp the enormous performance gap between CPU cycles, multiple cache levels, main memory, SSD/HDD, network distances, and system reboot times.
+* **Visualization:** Clickable memory nodes (Regs, L1, L2, L3, RAM, SSD, HDD, SF→NYC, SF→UK, SF→AUS, OS reboot, SCSI timeout, hardware virtualization reboot, physical system reboot) that spawn an animated packet traveling back to the CPU socket in proportionally accurate (log‑scaled) durations.
+* **Motherboard Layout:** Nodes are positioned roughly where you’d find them on a modern PC motherboard, reinforcing spatial intuition.
+
+---
+
+## ✨ Features
+
+1. **Interactive Memory Nodes**
+   Click any node to fire a packet that animates to the CPU with realistic timing.
+
+2. **Real‑World Latency Scaling**
+   Log‑scale mapping of nanoseconds → milliseconds → seconds → minutes → years, covering 0.3 ns to 5 minutes.
+
+3. **Configurable & Extendable**
+   Easily swap in new latency values or add more nodes (e.g., GPU memory, NVMe, cloud storage).
+
+4. **Responsive UI & Themes**
+   Supports light/dark mode, mobile/touch interactions, and ARIA‑friendly labels.
+
+5. **Documentation & Guided Tour**
+   In‑app tutorial via Shepherd.js walks new users through each memory level.
+
+6. **Live Charts & Stats** *(future)*
+   Hit/miss counters and Chart.js plots illustrate access patterns in real time.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** React + TypeScript
+* **Bundler:** Vite
+* **Styling:** CSS Modules (with a light/dark theme toggle)
+* **Visualization:** Web Animations API
+* **Charts:** Chart.js & react‑chartjs‑2
+* **Tour:** Shepherd.js
+* **Testing:** Jest & React Testing Library
+* **CI/CD:** GitHub Actions (lint, test, deploy)
+* **Hosting:** GitHub Pages (via `gh-pages`)
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+
+* Node.js (>= 16.x)
+* npm (>= 8.x)
+
+### Local Setup
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/AntonioCoppe/memory-latency-demo.git
+cd memory-latency-demo
+
+# 2. Install dependencies
+npm install
+
+# 3. Run locally
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open your browser at `http://localhost:5173/` and explore!
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Testing
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm run test
 ```
+
+### Build & Deploy
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to GitHub Pages
+npm run deploy
+```
+
+Your changes will be live at `https://antonioCoppe.github.io/memory-latency-demo/` shortly.
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/my-feature`
+3. Commit your changes: `git commit -m "feat: my new feature"`
+4. Push to your branch: `git push origin feat/my-feature`
+5. Open a Pull Request and describe your enhancement.
+
+Please ensure code is linted (`npm run lint`) and tested.
+
+---
+
+## 📄 License
+
+This project is open‑source under the [MIT License](LICENSE).
