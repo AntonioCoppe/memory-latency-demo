@@ -1,13 +1,13 @@
-// src/components/Board.tsx
-import React from 'react'
+import type { FC, MouseEvent } from 'react'
 import Tippy from '@tippyjs/react'
 import 'tippy.js/dist/tippy.css'
 
 export interface BoardProps {
+  /** Called with the `data-lat` key when any node is clicked */
   onNodeClick: (level: string) => void
 }
 
-// Raw durations in ms (log-scaled)
+// Raw durations in ms (log-scaled for animation)
 const durations: Record<string, number> = {
   Registers:   0.3,
   CPU:         0.3,
@@ -26,7 +26,7 @@ const durations: Record<string, number> = {
   PHYS: 30_000_000_000
 }
 
-// Human-readable labels
+// One-line descriptions for each level
 const descriptions: Record<string,string> = {
   Registers: 'On-core register file',
   CPU:       'Processor core executing instructions',
@@ -45,55 +45,38 @@ const descriptions: Record<string,string> = {
   PHYS:      'Full system reboot'
 }
 
-// Layout data
+// All of the memory nodes with their exact sizes & positions
 const nodes = [
-  { id: 'l3', dataLat: 'L3',  label: 'L3',  style: { width:'340px', height:'340px', border:'2px dashed #8e24aa', top:'180px', left:'430px' } },
-  { id: 'l2', dataLat: 'L2',  label: 'L2',  style: { width:'280px', height:'280px', border:'2px dashed #5e35b1', top:'210px', left:'460px' } },
-  { id: 'l1', dataLat: 'L1',  label: 'L1',  style: { width:'220px', height:'220px', border:'2px dashed #3949ab', top:'240px', left:'490px' } },
-  { id:'cpu-socket', dataLat:'CPU',      label:'CPU',           style:{ width:'160px', height:'160px', background:'#2196f3', top:'280px', left:'520px' } },
-  { id:'regs',       dataLat:'Registers',label:'Regs',         style:{ width:'80px',  height:'80px',  background:'#f44336', top:'310px', left:'550px' } },
-  { id:'ram1',       dataLat:'RAM',      label:'RAM',          style:{ width:'40px',  height:'200px', background:'#4caf50', top:'240px', left:'780px' } },
-  { id:'ram2',       dataLat:'RAM',      label:'RAM',          style:{ width:'40px',  height:'200px', background:'#4caf50', top:'240px', left:'830px' } },
-  { id:'ram3',       dataLat:'RAM',      label:'RAM',          style:{ width:'40px',  height:'200px', background:'#4caf50', top:'240px', left:'880px' } },
-  { id:'ram4',       dataLat:'RAM',      label:'RAM',          style:{ width:'40px',  height:'200px', background:'#4caf50', top:'240px', left:'930px' } },
-  { id:'ssd',        dataLat:'SSD',      label:'SSD',          style:{ width:'100px', height:'60px',  background:'#ff9800', top:'480px', left:'800px' } },
-  { id:'hdd',        dataLat:'HDD',      label:'HDD',          style:{ width:'120px', height:'50px',  background:'#795548', top:'550px', left:'780px' } },
-  { id:'net-nyc',    dataLat:'Net_NYC',  label:'SF→NYC',       style:{ width:'100px', height:'30px',  background:'#009688', top:'580px', left:'20px' } },
-  { id:'net-uk',     dataLat:'Net_UK',   label:'SF→UK',        style:{ width:'100px', height:'30px',  background:'#009688', top:'620px', left:'20px' } },
-  { id:'net-aus',    dataLat:'Net_AUS',  label:'SF→AUS',       style:{ width:'120px', height:'30px',  background:'#009688', top:'660px', left:'20px' } },
-  { id:'os',         dataLat:'OS',       label:'OS Reboot',    style:{ width:'120px', height:'30px',  background:'#e91e63', top:'580px', left:'1040px' } },
-  { id:'scsi',       dataLat:'SCSI',     label:'SCSI Timeout', style:{ width:'120px', height:'30px',  background:'#ff5722', top:'620px', left:'1040px' } },
-  { id:'hwv',        dataLat:'HW',       label:'HW Virt',      style:{ width:'120px', height:'30px',  background:'#cc7722', top:'660px', left:'1040px' } },
-  { id:'phy',        dataLat:'PHYS',     label:'System Reboot',style:{ width:'140px', height:'30px',  background:'#212121', top:'700px', left:'1040px' } }
+  { id:'l3',        dataLat:'L3',       label:'L3',            style:{ width:'340px', height:'340px', border:'2px dashed #8e24aa', top:'180px', left:'430px' } },
+  { id:'l2',        dataLat:'L2',       label:'L2',            style:{ width:'280px', height:'280px', border:'2px dashed #5e35b1', top:'210px', left:'460px' } },
+  { id:'l1',        dataLat:'L1',       label:'L1',            style:{ width:'220px', height:'220px', border:'2px dashed #3949ab', top:'240px', left:'490px' } },
+  { id:'cpu-socket',dataLat:'CPU',      label:'CPU',           style:{ width:'160px', height:'160px', background:'#2196f3',      top:'280px', left:'520px' } },
+  { id:'regs',      dataLat:'Registers',label:'Regs',         style:{ width:' 80px', height:' 80px', background:'#f44336',      top:'310px', left:'550px' } },
+  { id:'ram1',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'780px' } },
+  { id:'ram2',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'830px' } },
+  { id:'ram3',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'880px' } },
+  { id:'ram4',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'930px' } },
+  { id:'ssd',       dataLat:'SSD',      label:'SSD',           style:{ width:'100px', height:' 60px', background:'#ff9800',      top:'480px', left:'800px' } },
+  { id:'hdd',       dataLat:'HDD',      label:'HDD',           style:{ width:'120px', height:' 50px', background:'#795548',      top:'550px', left:'780px' } }
 ]
 
-// Converts ms → ms/s/min/h string
+// Helper to format ms into ms, s, min, h, d, or y
 function formatTime(ms: number): string {
-  if (ms < 1_000) {
-    return `${ms.toFixed(1)} ms`
-  }
-  const secs = ms / 1_000
-  if (secs < 60) {
-    return `${secs.toFixed(2)} s`
-  }
-  const mins = secs / 60
-  if (mins < 60) {
-    return `${mins.toFixed(2)} min`
-  }
-  const hrs = mins / 60
-  if (hrs < 24) {
-    return `${hrs.toFixed(2)} hours`
-  }
-  const days = hrs / 24
-  if (days < 365) {
-    return `${days.toFixed(2)} days`
-  }
-  const years = days / 365
-  return `${years.toFixed(2)} years`
+  if (ms < 1_000) return `${ms.toFixed(1)} ms`
+  const s = ms / 1_000
+  if (s < 60) return `${s.toFixed(2)} s`
+  const m = s / 60
+  if (m < 60) return `${m.toFixed(2)} min`
+  const h = m / 60
+  if (h < 24) return `${h.toFixed(2)} h`
+  const d = h / 24
+  if (d < 365) return `${d.toFixed(2)} d`
+  const y = d / 365
+  return `${y.toFixed(2)} y`
 }
 
-export const Board: React.FC<BoardProps> = ({ onNodeClick }) => {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+export const Board: FC<BoardProps> = ({ onNodeClick }) => {
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget
     const key = el.dataset.lat!
     onNodeClick(key)
@@ -101,6 +84,7 @@ export const Board: React.FC<BoardProps> = ({ onNodeClick }) => {
     const duration = durations[key]
     if (!duration) return
 
+    // create & position packet
     const packet = document.createElement('div')
     packet.className = 'packet'
     document.body.appendChild(packet)
@@ -125,33 +109,30 @@ export const Board: React.FC<BoardProps> = ({ onNodeClick }) => {
   }
 
   return (
-    <div>
-      <h1>Memory Latency on a Motherboard</h1>
-      <div id="board">
-        {nodes.map(node => (
-          <Tippy
-            key={node.id}
-            content={
-              <div style={{ fontSize: '13px', lineHeight: 1.3 }}>
-                <strong>{node.label}</strong><br/>
-                {descriptions[node.dataLat]}<br/>
-                Animation: {formatTime(durations[node.dataLat])}
-              </div>
-            }
-            delay={[200, 0]}
+    <div id="board">
+      {nodes.map(node => (
+        <Tippy
+          key={node.id}
+          content={
+            <>
+              <strong>{node.label}</strong><br/>
+              {descriptions[node.dataLat]}<br/>
+              Anim: {formatTime(durations[node.dataLat])}
+            </>
+          }
+          delay={[200, 0]}
+        >
+          <div
+            id={node.id}
+            className="mem"
+            data-lat={node.dataLat}
+            style={node.style}
+            onClick={handleClick}
           >
-            <div
-              id={node.id}
-              className="mem"
-              data-lat={node.dataLat}
-              style={node.style}
-              onClick={handleClick}
-            >
-              <span className="label">{node.label}</span>
-            </div>
-          </Tippy>
-        ))}
-      </div>
+            <span className="label">{node.label}</span>
+          </div>
+        </Tippy>
+      ))}
     </div>
   )
 }

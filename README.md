@@ -2,9 +2,7 @@
 
 An **interactive, web‑based simulation** that visualizes the relative latencies of different memory/storage media—from CPU registers all the way out to network and reboot times—laid out on a motherboard‑style diagram.
 
-<p align="center">
-  <img src="./public/preview.png" alt="Screenshot of Memory Latency Demo" width="600">
-</p>
+![Screenshot of Memory Latency Demo](./public/preview.png)
 
 ---
 
@@ -12,7 +10,7 @@ An **interactive, web‑based simulation** that visualizes the relative latencie
 
 👉 [https://antonioCoppe.github.io/memory-latency-demo/](https://antonioCoppe.github.io/memory-latency-demo/)
 
-*(Published via GitHub Pages)*
+Published via GitHub Pages
 
 ---
 

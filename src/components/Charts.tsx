@@ -1,4 +1,4 @@
-import React from 'react'
+import type { FC } from 'react'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,13 +20,12 @@ ChartJS.register(
   Legend
 )
 
-interface ChartsProps {
-  // keys will match your dataLat values, e.g. 'L1', 'L2', 'RAM', etc.
+export interface ChartsProps {
+  /** click counts per memory level */
   stats: Record<string, number>
 }
 
-export const Charts: React.FC<ChartsProps> = ({ stats }) => {
-  // Extract labels and counts in a stable order
+export const Charts: FC<ChartsProps> = ({ stats }) => {
   const labels = Object.keys(stats)
   const data = {
     labels,
@@ -34,7 +33,7 @@ export const Charts: React.FC<ChartsProps> = ({ stats }) => {
       {
         label: 'Click Count',
         data: labels.map((l) => stats[l]),
-        backgroundColor: 'rgba(255, 235, 59, 0.8)', // yellow bars
+        backgroundColor: 'rgba(255, 235, 59, 0.8)',
         borderColor:     'rgba(255, 235, 59, 1)',
         borderWidth: 1
       }
@@ -45,17 +44,17 @@ export const Charts: React.FC<ChartsProps> = ({ stats }) => {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: 'Memory Node Click Stats' }
+      title: { display: true, text: 'Memory Node Click Stats', color: '#eee' }
     },
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: 'Clicks' },
+        title: { display: true, text: 'Clicks', color: '#eee' },
         ticks: { color: '#eee' },
         grid:  { color: '#444' }
       },
       x: {
-        title: { display: true, text: 'Memory Level' },
+        title: { display: true, text: 'Memory Level', color: '#eee' },
         ticks: { color: '#eee' },
         grid:  { color: '#444' }
       }
