@@ -2,21 +2,21 @@ import React from 'react';
 
 // Real‐world latencies (ms, log‐scaled for animation)
 const durations: Record<string, number> = {
-  Registers:   3,
-  CPU:         3,
-  L1:          9,
-  L2:         28,
-  L3:        129,
-  RAM:     1200,
-  SSD:   100000,
-  HDD:  5500000,
-  Net_NYC:   40000000,
-  Net_UK:    81000000,
-  Net_AUS:  183000000,
-  OS:    4000000000,
-  SCSI: 30000000000,
-  HW:   40000000000,
-  PHYS:300000000000
+  Registers:0.3,
+  CPU:      0.3,
+  L1:       0.9,
+  L2:       2.8,
+  L3:       12.9,
+  RAM:      120,
+  SSD:      10000,
+  HDD:      550000,
+  Net_NYC:  4000000,
+  Net_UK:   8100000,
+  Net_AUS:  18300000,
+  OS:       400000000,
+  SCSI:     3000000000,
+  HW:       4000000000,
+  PHYS:     30000000000
 };
 
 // All of the nodes with their exact sizes & positions from your HTML demo
