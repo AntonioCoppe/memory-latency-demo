@@ -1,12 +1,11 @@
 // src/components/Board.tsx
 import React from 'react'
 
-// Props: callback to notify parent which level was clicked
 export interface BoardProps {
   onNodeClick: (level: string) => void
 }
 
-// Real‐world latencies (ms, log-scaled for animation)
+// Latencies (ms, log-scaled)
 const durations: Record<string, number> = {
   Registers:   0.3,
   CPU:         0.3,
@@ -25,7 +24,6 @@ const durations: Record<string, number> = {
   PHYS: 30_000_000_000
 }
 
-// Each node’s id, data-lat key, label, and absolute CSS positioning
 const nodes = [
   { id: 'l3',        dataLat: 'L3',       label: 'L3',            style: { width: '340px', height: '340px', border: '2px dashed #8e24aa', top: '180px', left: '430px' } },
   { id: 'l2',        dataLat: 'L2',       label: 'L2',            style: { width: '280px', height: '280px', border: '2px dashed #5e35b1', top: '210px', left: '460px' } },
@@ -48,6 +46,7 @@ const nodes = [
 ]
 
 export const Board: React.FC<BoardProps> = ({ onNodeClick }) => {
+
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget
     const key = el.dataset.lat!
@@ -56,24 +55,30 @@ export const Board: React.FC<BoardProps> = ({ onNodeClick }) => {
     const duration = durations[key]
     if (!duration) return
 
-    // create & position packet
+    // create packet
     const packet = document.createElement('div')
     packet.className = 'packet'
     document.body.appendChild(packet)
 
-    const from = el.getBoundingClientRect()
-    packet.style.left = `${from.left + from.width/2 - 6}px`
-    packet.style.top  = `${from.top  + from.height/2 - 6}px`
+    // get element viewport coords, then convert to document coords
+    const fromRect = el.getBoundingClientRect()
+    const startX = fromRect.left + window.scrollX + fromRect.width/2 - 6
+    const startY = fromRect.top  + window.scrollY + fromRect.height/2 - 6
+    packet.style.left = `${startX}px`
+    packet.style.top  = `${startY}px`
 
-    // compute delta to CPU
-    const cpu = document.getElementById('cpu-socket')!
-    const cpuRect = cpu.getBoundingClientRect()
-    const dx = cpuRect.left + cpuRect.width/2 - (from.left + from.width/2)
-    const dy = cpuRect.top  + cpuRect.height/2 - (from.top  + from.height/2)
+    // same for CPU
+    const cpuEl = document.getElementById('cpu-socket')!
+    const cpuRect = cpuEl.getBoundingClientRect()
+    const endX = cpuRect.left + window.scrollX + cpuRect.width/2
+    const endY = cpuRect.top  + window.scrollY + cpuRect.height/2
 
-    // animate & cleanup
+    // animate the translation
     packet.animate(
-      [{ transform: 'translate(0,0)' }, { transform: `translate(${dx}px,${dy}px)` }],
+      [
+        { transform: 'translate(0,0)' },
+        { transform: `translate(${endX - startX}px, ${endY - startY}px)` }
+      ],
       { duration, easing: 'linear' }
     ).onfinish = () => packet.remove()
   }
