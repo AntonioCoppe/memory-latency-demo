@@ -1,8 +1,8 @@
 # Memory Latency Demo
 
-An **interactive, web‑based simulation** that visualizes the relative latencies of different memory/storage media—from CPU registers all the way out to network and reboot times—laid out on a motherboard‑style diagram.
+An interactive, web-based simulation that visualizes the enormous performance differences between CPU registers, multiple cache levels, main memory, SSD/HDD, network round-trips, and full system reboots—laid out on a detailed, PCB-style motherboard diagram.
 
-![Screenshot of Memory Latency Demo](./public/preview.png)
+![Preview of Memory Latency Demo](./public/preview.png)
 
 ---
 
@@ -10,109 +10,95 @@ An **interactive, web‑based simulation** that visualizes the relative latencie
 
 👉 [https://antonioCoppe.github.io/memory-latency-demo/](https://antonioCoppe.github.io/memory-latency-demo/)
 
-Published via GitHub Pages
+---
+
+## 🔍 Overview
+
+**Memory Latency Demo** helps developers and students build an intuitive understanding of how access times grow by orders of magnitude as you move further from the CPU core:
+
+- **CPU Registers:** ~0.3 ns  
+- **L1/L2/L3 Caches:** ~1–13 ns  
+- **DRAM (RAM):** ~120 ns  
+- **NVMe SSD / HDD:** ~50 µs – 10 ms  
+- **Network (SF→NYC/UK/AUS):** ~40–183 ms  
+- **System Reboots & Timeouts:** seconds → minutes → years  
+
+Click any memory node to launch a little “packet” that animates back to the CPU socket in proportionally accurate (log-scaled) time.
 
 ---
 
-## 🔍 Project Overview
+## ✨ Key Features
 
-* **Goal:** Help developers and students grasp the enormous performance gap between CPU cycles, multiple cache levels, main memory, SSD/HDD, network distances, and system reboot times.
-* **Visualization:** Clickable memory nodes (Regs, L1, L2, L3, RAM, SSD, HDD, SF→NYC, SF→UK, SF→AUS, OS reboot, SCSI timeout, hardware virtualization reboot, physical system reboot) that spawn an animated packet traveling back to the CPU socket in proportionally accurate (log‑scaled) durations.
-* **Motherboard Layout:** Nodes are positioned roughly where you’d find them on a modern PC motherboard, reinforcing spatial intuition.
+- **Interactive Nodes:**  
+  Click on “Regs”, “L1”, “RAM”, “SSD”, “SF→NYC”, “OS Reboot” and more to fire an animated packet at realistic speed.
 
----
+- **Accurate Time Scaling:**  
+  Visualizes sub-nanosecond to multi-year latencies on a single interactive canvas.
 
-## ✨ Features
+- **PCB-Style Layout:**  
+  Modeled after a real motherboard with copper-trace background, slot graphics, and component clusters.
 
-1. **Interactive Memory Nodes**
-   Click any node to fire a packet that animates to the CPU with realistic timing.
+- **Network & System Panels:**  
+  Sidebar “server rack” and “console” panels display static latency values in human-readable units (ms, s, min, d, y).
 
-2. **Real‑World Latency Scaling**
-   Log‑scale mapping of nanoseconds → milliseconds → seconds → minutes → years, covering 0.3 ns to 5 minutes.
+- **Real-Time Charts:**  
+  Click counters feed into a live Chart.js bar graph to show which nodes you queried most.
 
-3. **Configurable & Extendable**
-   Easily swap in new latency values or add more nodes (e.g., GPU memory, NVMe, cloud storage).
+- **Persistent Stats:**  
+  Your click counts are saved in `localStorage`—reload and your stats remain.
 
-4. **Responsive UI & Themes**
-   Supports light/dark mode, mobile/touch interactions, and ARIA‑friendly labels.
-
-5. **Documentation & Guided Tour**
-   In‑app tutorial via Shepherd.js walks new users through each memory level.
-
-6. **Live Charts & Stats** *(future)*
-   Hit/miss counters and Chart.js plots illustrate access patterns in real time.
+- **Themed & Responsive:**  
+  Dark-mode by default, mobile-friendly, ARIA-compliant, and keyboard-accessible.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠 Tech Stack
 
-* **Framework:** React + TypeScript
-* **Bundler:** Vite
-* **Styling:** CSS Modules (with a light/dark theme toggle)
-* **Visualization:** Web Animations API
-* **Charts:** Chart.js & react‑chartjs‑2
-* **Tour:** Shepherd.js
-* **Testing:** Jest & React Testing Library
-* **CI/CD:** GitHub Actions (lint, test, deploy)
-* **Hosting:** GitHub Pages (via `gh-pages`)
+- **Framework:** React + TypeScript  
+- **Bundler:** Vite  
+- **Styling:** CSS Modules with custom PCB and panel styles  
+- **Animations:** Web Animations API  
+- **Charts:** Chart.js & react-chartjs-2  
+- **Tour (Tutorial):** Shepherd.js  
+- **Testing:** Jest & React Testing Library  
+- **CI/CD:** GitHub Actions (build, test, deploy)  
+- **Hosting:** GitHub Pages  
 
 ---
 
-## 📦 Getting Started
+## 📦 Getting Started Local Development
 
 ### Prerequisites
 
-* Node.js (>= 16.x)
-* npm (>= 8.x)
+- **Node.js** ≥ 16.x  
+- **npm** ≥ 8.x  
 
-### Local Setup
+### 1. Clone the repository
 
-```bash
-# 1. Clone the repo
 git clone https://github.com/AntonioCoppe/memory-latency-demo.git
 cd memory-latency-demo
 
-# 2. Install dependencies
+### 2. Install dependencies
+
 npm install
 
-# 3. Run locally
+### 3. Run the development server
+
 npm run dev
-```
 
-Open your browser at `http://localhost:5173/` and explore!
+### 4. Running Tests
 
-### Testing
-
-```bash
 npm run test
-```
 
-### Build & Deploy
+### Build for production
 
-```bash
-# Build for production
 npm run build
 
-# Deploy to GitHub Pages
+### Deploy to GitHub Pages
+
 npm run deploy
-```
+Changes will publish automatically at https://antonioCoppe.github.io/memory-latency-demo/.
 
-Your changes will be live at `https://antonioCoppe.github.io/memory-latency-demo/` shortly.
+## 🚀 Why This Matters
 
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Commit your changes: `git commit -m "feat: my new feature"`
-4. Push to your branch: `git push origin feat/my-feature`
-5. Open a Pull Request and describe your enhancement.
-
-Please ensure code is linted (`npm run lint`) and tested.
-
----
-
-## 📄 License
-
-This project is open‑source under the [MIT License](LICENSE).
+Modern software performance is dominated by memory access costs. This demo makes abstract latency numbers tangible—so you can design faster, more efficient systems and understand the real-world impact of your code’s memory behavior.
