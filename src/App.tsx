@@ -45,7 +45,7 @@ function formatTime(s: number) {
 }
 
 const App: FC = () => {
-  const [stats, increment, reset] = useLatencyStats(allLevels)
+  const [stats, recordLatency, reset] = useLatencyStats(allLevels)
 
   // Adjustable parameters
   const [cpuFreq, setCpuFreq] = useState(3)   // in GHz
@@ -150,7 +150,7 @@ const App: FC = () => {
 
       {/* PCB BOARD */}
       <div className="board-wrapper">
-        <Board onNodeClick={increment} durations={durations} />
+        <Board onNodeClick={recordLatency} durations={durations} />
       </div>
 
       {/* SYSTEM PANEL */}
@@ -165,10 +165,10 @@ const App: FC = () => {
         </ul>
       </aside>
 
-      {/* CHART */}
+      {/* CHART: pass full stats to show expected vs actual */}
       <section className="chart-section">
         <h2>Click Statistics</h2>
-        <Charts stats={stats} />
+         <Charts stats={stats} />
       </section>
     </div>
   )

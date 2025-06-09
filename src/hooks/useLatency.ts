@@ -2,13 +2,31 @@ import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'latencyStats';
 
+export type LatencyEntry = {
+  count: number;
+  totalExpected: number;
+  totalActual: number;
+};
+
+export type LatencyStats = Record<string, LatencyEntry>;
+
+/**
+ * Hook to track both expected and actual latency per memory level.
+ * Returns [stats, recordLatency, reset]
+ * - stats: mapping level → { count, totalExpected, totalActual }
+ * - recordLatency: (level, expectedMs, actualMs) => void
+ * - reset: () => void
+ */
 export function useLatencyStats(levels: string[]) {
-  const [stats, setStats] = useState<Record<string, number>>(() => {
+  const [stats, setStats] = useState<LatencyStats>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch { /* ignore */ }
-    return Object.fromEntries(levels.map(l => [l, 0]));
+      if (saved) return JSON.parse(saved) as LatencyStats;
+    } catch { /* ignore parse errors */ }
+    // initialize zeroed stats
+    return Object.fromEntries(
+      levels.map(l => [l, { count: 0, totalExpected: 0, totalActual: 0 }])
+    ) as LatencyStats;
   });
 
   useEffect(() => {
@@ -17,15 +35,25 @@ export function useLatencyStats(levels: string[]) {
     } catch { /* ignore */ }
   }, [stats]);
 
-  const increment = useCallback((level: string) => {
-    setStats(prev => ({ ...prev, [level]: (prev[level] || 0) + 1 }));
+  const recordLatency = useCallback((level: string, expectedMs: number, actualMs: number) => {
+    setStats(prev => {
+      const prevEntry = prev[level] || { count: 0, totalExpected: 0, totalActual: 0 };
+      const updated: LatencyEntry = {
+        count: prevEntry.count + 1,
+        totalExpected: prevEntry.totalExpected + expectedMs,
+        totalActual: prevEntry.totalActual + actualMs
+      };
+      return { ...prev, [level]: updated };
+    });
   }, []);
 
   const reset = useCallback(() => {
-    const zeroed = Object.fromEntries(levels.map(l => [l, 0]));
+    const zeroed = Object.fromEntries(
+      levels.map(l => [l, { count: 0, totalExpected: 0, totalActual: 0 }])
+    ) as LatencyStats;
     setStats(zeroed);
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }, [levels]);
 
-  return [stats, increment, reset] as const;
+  return [stats, recordLatency, reset] as const;
 }

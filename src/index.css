@@ -169,3 +169,24 @@ header h1 {
   position: absolute;
   border-radius: 2px;
 }
+
+/* ───── PARAMETER CONTROLS ───── */
+.parameter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin: 20px 0;
+}
+.parameter-controls label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+.parameter-controls input[type="range"] {
+  width: 150px;
+  margin-top: 4px;
+}
+

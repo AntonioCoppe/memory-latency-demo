@@ -3,8 +3,8 @@ import Tippy from '@tippyjs/react'
 import 'tippy.js/dist/tippy.css'
 
 export interface BoardProps {
-  /** Called with the `data-lat` key when any node is clicked */
-  onNodeClick: (level: string) => void
+  /** Record latency: level, expectedMs, actualMs */
+  onNodeClick: (level: string, expectedMs: number, actualMs: number) => void
   /** Durations mapping for each level, in ms */
   durations: Record<string, number>
 }
@@ -34,7 +34,7 @@ const nodes = [
   { id: 'l2',        dataLat: 'L2',       label: 'L2',            style: { width: '280px', height: '280px', border: '2px dashed #5e35b1', top: '210px', left: '460px' } },
   { id: 'l1',        dataLat: 'L1',       label: 'L1',            style: { width: '220px', height: '220px', border: '2px dashed #3949ab', top: '240px', left: '490px' } },
   { id: 'cpu-socket', dataLat: 'CPU',      label: 'CPU',           style: { width: '160px', height: '160px', background: '#2196f3',      top: '280px', left: '520px' } },
-  { id: 'regs',      dataLat: 'Registers',label: 'Regs',         style: { width: ' 80px', height: ' 80px', background: '#f44336',      top: '310px', left: '550px' } },
+  { id: 'regs',      dataLat: 'Registers', label: 'Regs',         style: { width: ' 80px', height: ' 80px', background: '#f44336',      top: '310px', left: '550px' } },
   { id: 'ram1',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '780px' } },
   { id: 'ram2',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '830px' } },
   { id: 'ram3',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '880px' } },
@@ -62,10 +62,8 @@ export const Board: FC<BoardProps> = ({ onNodeClick, durations }) => {
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget
     const key = el.dataset.lat!
-    onNodeClick(key)
-
-    const duration = durations[key]
-    if (duration === undefined) return
+    const expected = durations[key]
+    if (expected === undefined) return
 
     // create & position packet
     const packet = document.createElement('div')
@@ -82,13 +80,18 @@ export const Board: FC<BoardProps> = ({ onNodeClick, durations }) => {
     const endX = cpuRect.left + window.scrollX + cpuRect.width / 2
     const endY = cpuRect.top + window.scrollY + cpuRect.height / 2
 
+    const t0 = performance.now()
     packet.animate(
       [
         { transform: 'translate(0,0)' },
         { transform: `translate(${endX - startX}px, ${endY - startY}px)` }
       ],
-      { duration, easing: 'linear' }
-    ).onfinish = () => packet.remove()
+      { duration: expected, easing: 'linear' }
+    ).onfinish = () => {
+      const actual = performance.now() - t0
+      onNodeClick(key, expected, actual)
+      packet.remove()
+    }
   }
 
   return (
