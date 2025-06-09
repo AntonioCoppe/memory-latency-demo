@@ -5,29 +5,12 @@ import 'tippy.js/dist/tippy.css'
 export interface BoardProps {
   /** Called with the `data-lat` key when any node is clicked */
   onNodeClick: (level: string) => void
-}
-
-// Raw durations in ms (log-scaled for animation)
-const durations: Record<string, number> = {
-  Registers:   0.3,
-  CPU:         0.3,
-  L1:          0.9,
-  L2:          2.8,
-  L3:         12.9,
-  RAM:       120,
-  SSD:     10_000,
-  HDD:    550_000,
-  Net_NYC: 4_000_000,
-  Net_UK:   8_100_000,
-  Net_AUS: 18_300_000,
-  OS:     400_000_000,
-  SCSI: 3_000_000_000,
-  HW:    4_000_000_000,
-  PHYS: 30_000_000_000
+  /** Durations mapping for each level, in ms */
+  durations: Record<string, number>
 }
 
 // One-line descriptions for each level
-const descriptions: Record<string,string> = {
+const descriptions: Record<string, string> = {
   Registers: 'On-core register file',
   CPU:       'Processor core executing instructions',
   L1:        'Per-thread, on-core cache',
@@ -47,17 +30,17 @@ const descriptions: Record<string,string> = {
 
 // All of the memory nodes with their exact sizes & positions
 const nodes = [
-  { id:'l3',        dataLat:'L3',       label:'L3',            style:{ width:'340px', height:'340px', border:'2px dashed #8e24aa', top:'180px', left:'430px' } },
-  { id:'l2',        dataLat:'L2',       label:'L2',            style:{ width:'280px', height:'280px', border:'2px dashed #5e35b1', top:'210px', left:'460px' } },
-  { id:'l1',        dataLat:'L1',       label:'L1',            style:{ width:'220px', height:'220px', border:'2px dashed #3949ab', top:'240px', left:'490px' } },
-  { id:'cpu-socket',dataLat:'CPU',      label:'CPU',           style:{ width:'160px', height:'160px', background:'#2196f3',      top:'280px', left:'520px' } },
-  { id:'regs',      dataLat:'Registers',label:'Regs',         style:{ width:' 80px', height:' 80px', background:'#f44336',      top:'310px', left:'550px' } },
-  { id:'ram1',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'780px' } },
-  { id:'ram2',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'830px' } },
-  { id:'ram3',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'880px' } },
-  { id:'ram4',      dataLat:'RAM',      label:'RAM',           style:{ width:' 40px', height:'200px', background:'#4caf50',      top:'240px', left:'930px' } },
-  { id:'ssd',       dataLat:'SSD',      label:'SSD',           style:{ width:'100px', height:' 60px', background:'#ff9800',      top:'480px', left:'800px' } },
-  { id:'hdd',       dataLat:'HDD',      label:'HDD',           style:{ width:'120px', height:' 50px', background:'#795548',      top:'550px', left:'780px' } }
+  { id: 'l3',        dataLat: 'L3',       label: 'L3',            style: { width: '340px', height: '340px', border: '2px dashed #8e24aa', top: '180px', left: '430px' } },
+  { id: 'l2',        dataLat: 'L2',       label: 'L2',            style: { width: '280px', height: '280px', border: '2px dashed #5e35b1', top: '210px', left: '460px' } },
+  { id: 'l1',        dataLat: 'L1',       label: 'L1',            style: { width: '220px', height: '220px', border: '2px dashed #3949ab', top: '240px', left: '490px' } },
+  { id: 'cpu-socket', dataLat: 'CPU',      label: 'CPU',           style: { width: '160px', height: '160px', background: '#2196f3',      top: '280px', left: '520px' } },
+  { id: 'regs',      dataLat: 'Registers',label: 'Regs',         style: { width: ' 80px', height: ' 80px', background: '#f44336',      top: '310px', left: '550px' } },
+  { id: 'ram1',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '780px' } },
+  { id: 'ram2',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '830px' } },
+  { id: 'ram3',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '880px' } },
+  { id: 'ram4',      dataLat: 'RAM',      label: 'RAM',           style: { width: ' 40px', height: '200px', background: '#4caf50',      top: '240px', left: '930px' } },
+  { id: 'ssd',       dataLat: 'SSD',      label: 'SSD',           style: { width: '100px', height: ' 60px', background: '#ff9800',      top: '480px', left: '800px' } },
+  { id: 'hdd',       dataLat: 'HDD',      label: 'HDD',           style: { width: '120px', height: ' 50px', background: '#795548',      top: '550px', left: '780px' } }
 ]
 
 // Helper to format ms into ms, s, min, h, d, or y
@@ -75,14 +58,14 @@ function formatTime(ms: number): string {
   return `${y.toFixed(2)} y`
 }
 
-export const Board: FC<BoardProps> = ({ onNodeClick }) => {
+export const Board: FC<BoardProps> = ({ onNodeClick, durations }) => {
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget
     const key = el.dataset.lat!
     onNodeClick(key)
 
     const duration = durations[key]
-    if (!duration) return
+    if (duration === undefined) return
 
     // create & position packet
     const packet = document.createElement('div')
@@ -90,14 +73,14 @@ export const Board: FC<BoardProps> = ({ onNodeClick }) => {
     document.body.appendChild(packet)
 
     const from = el.getBoundingClientRect()
-    const startX = from.left + window.scrollX + from.width/2 - 6
-    const startY = from.top  + window.scrollY + from.height/2 - 6
+    const startX = from.left + window.scrollX + from.width / 2 - 6
+    const startY = from.top + window.scrollY + from.height / 2 - 6
     packet.style.left = `${startX}px`
-    packet.style.top  = `${startY}px`
+    packet.style.top = `${startY}px`
 
     const cpuRect = document.getElementById('cpu-socket')!.getBoundingClientRect()
-    const endX = cpuRect.left + window.scrollX + cpuRect.width/2
-    const endY = cpuRect.top  + window.scrollY + cpuRect.height/2
+    const endX = cpuRect.left + window.scrollX + cpuRect.width / 2
+    const endY = cpuRect.top + window.scrollY + cpuRect.height / 2
 
     packet.animate(
       [

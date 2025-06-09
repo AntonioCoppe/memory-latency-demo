@@ -75,7 +75,7 @@ Click any memory node to launch a little “packet” that animates back to the 
 
 ### 1. Clone the repository
 
-git clone https://github.com/AntonioCoppe/memory-latency-demo.git
+git clone <https://github.com/AntonioCoppe/memory-latency-demo.git>
 cd memory-latency-demo
 
 ### 2. Install dependencies
@@ -97,7 +97,7 @@ npm run build
 ### Deploy to GitHub Pages
 
 npm run deploy
-Changes will publish automatically at https://antonioCoppe.github.io/memory-latency-demo/.
+Changes will publish automatically at <https://antonioCoppe.github.io/memory-latency-demo/>.
 
 ## 🚀 Why This Matters
 

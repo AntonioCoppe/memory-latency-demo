@@ -1,4 +1,5 @@
 import type { FC } from 'react'
+import { useState } from 'react'
 import { Board } from './components/Board'
 import { Charts } from './components/Charts'
 import { useLatencyStats } from './hooks/useLatency'
@@ -11,7 +12,8 @@ const allLevels = [
   'OS','SCSI','HW','PHYS'
 ]
 
-const durations: Record<string, number> = {
+// Baseline durations in milliseconds
+const baselineDurations: Record<string, number> = {
   Registers:   0.3,   CPU:          0.3,
   L1:           0.9,   L2:          2.8,
   L3:         12.9,   RAM:        120,
@@ -29,11 +31,11 @@ const sysNames: Record<string,string> = {
   PHYS: 'System Reboot'
 }
 
-function formatTime(ms: number): string {
-  if (ms < 1000) return `${ms.toFixed(1)} ms`
-  const s = ms / 1000
-  if (s < 60) return `${s.toFixed(2)} s`
-  const m = s / 60
+function formatTime(s: number) {
+  if (s < 1000) return `${s.toFixed(2)} ms`
+  const secs = s / 1000
+  if (secs < 60) return `${secs.toFixed(2)} s`
+  const m = secs / 60
   if (m < 60) return `${m.toFixed(2)} min`
   const h = m / 60
   if (h < 24) return `${h.toFixed(2)} h`
@@ -44,6 +46,12 @@ function formatTime(ms: number): string {
 
 const App: FC = () => {
   const [stats, increment, reset] = useLatencyStats(allLevels)
+
+  // Adjustable parameters
+  const [cpuFreq, setCpuFreq] = useState(3)   // in GHz
+  const [l1Size, setL1Size]     = useState(32) // in KB
+  const [l2Size, setL2Size]     = useState(256)// in KB
+  const [l3Size, setL3Size]     = useState(8)  // in MB
 
   // Spawn 20 random packet clicks
   const randomAccess = () => {
@@ -58,59 +66,104 @@ const App: FC = () => {
     }
   }
 
-  // Click through every node in order
-  const sequentialAccess = () => {
-    const nodes = Array.from(
-      document.querySelectorAll<HTMLDivElement>('.mem')
-    )
-    nodes.forEach((el, i) => {
-      setTimeout(() => el.click(), i * 150)
-    })
+  // Compute scaled durations based on parameters
+  const getAdjustedDurations = () => {
+    const scaleByCpu = 3 / cpuFreq
+    return Object.fromEntries(
+      Object.entries(baselineDurations).map(([lvl, dur]) => {
+        let adjusted = dur * scaleByCpu
+        if (lvl === 'L1') adjusted *= (l1Size / 32)
+        if (lvl === 'L2') adjusted *= (l2Size / 256)
+        if (lvl === 'L3') adjusted *= ((l3Size * 1024) / 8192)
+        return [lvl, adjusted]
+      })
+    ) as Record<string, number>
   }
+  const durations = getAdjustedDurations()
 
   return (
     <div className="app-container">
-      {/* TITLE + CONTROLS */}
-      <header>
-        <h1>Memory Latency Demo</h1>
-        <div className="controls">
-          <button onClick={randomAccess}>Random Access</button>
-          <button onClick={sequentialAccess}>Sequential Access</button>
-          <button onClick={reset}>Clear Data</button>
-        </div>
-      </header>
-
-      {/* MAIN ROW */}
-      <section className="main-row">
-        {/* NETWORK PANEL */}
-        <aside className="network-panel">
-          <h2>Network</h2>
-          <ul>
-            {['Net_NYC','Net_UK','Net_AUS'].map(lvl => (
-              <li key={lvl}>
-                {lvl.replace('Net_','SF→')}: {formatTime(durations[lvl])}
-              </li>
-            ))}
-          </ul>
-        </aside>
-
-        {/* PCB BOARD */}
-        <div className="board-wrapper">
-          <Board onNodeClick={increment} />
-        </div>
-
-        {/* SYSTEM PANEL */}
-        <aside className="system-panel">
-          <h2>System</h2>
-          <ul>
-            {['OS','SCSI','HW','PHYS'].map(lvl => (
-              <li key={lvl}>
-                {sysNames[lvl]}: {formatTime(durations[lvl])}
-              </li>
-            ))}
-          </ul>
-        </aside>
+      <section className="controls">
+        <button onClick={reset}>Reset Stats</button>
+        <button onClick={randomAccess}>Random Access</button>
       </section>
+
+      {/* Parameter Controls */}
+      <section className="parameter-controls">
+        <label>
+          CPU Clock: {cpuFreq.toFixed(1)} GHz
+          <input
+            type="range"
+            min={1}
+            max={5}
+            step={0.1}
+            value={cpuFreq}
+            onChange={e => setCpuFreq(parseFloat(e.target.value))}
+          />
+        </label>
+        <label>
+          L1 Cache: {l1Size} KB
+          <input
+            type="range"
+            min={16}
+            max={128}
+            step={8}
+            value={l1Size}
+            onChange={e => setL1Size(parseInt(e.target.value))}
+          />
+        </label>
+        <label>
+          L2 Cache: {l2Size} KB
+          <input
+            type="range"
+            min={128}
+            max={1024}
+            step={64}
+            value={l2Size}
+            onChange={e => setL2Size(parseInt(e.target.value))}
+          />
+        </label>
+        <label>
+          L3 Cache: {l3Size} MB
+          <input
+            type="range"
+            min={4}
+            max={16}
+            step={1}
+            value={l3Size}
+            onChange={e => setL3Size(parseInt(e.target.value))}
+          />
+        </label>
+      </section>
+
+      {/* NETWORK PANEL */}
+      <section className="network-panel">
+        <h2>Network</h2>
+        <ul>
+          {['Net_NYC','Net_UK','Net_AUS'].map(lvl => (
+            <li key={lvl}>
+              {lvl.replace('Net_','SF→')}: {formatTime(durations[lvl])}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* PCB BOARD */}
+      <div className="board-wrapper">
+        <Board onNodeClick={increment} durations={durations} />
+      </div>
+
+      {/* SYSTEM PANEL */}
+      <aside className="system-panel">
+        <h2>System</h2>
+        <ul>
+          {['OS','SCSI','HW','PHYS'].map(lvl => (
+            <li key={lvl}>
+              {sysNames[lvl]}: {formatTime(durations[lvl])}
+            </li>
+          ))}
+        </ul>
+      </aside>
 
       {/* CHART */}
       <section className="chart-section">
